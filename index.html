@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Week For Gunika ❤️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Montserrat:wght@300;600&family=Parisienne&family=Tangerine:wght@700&display=swap" rel="stylesheet">
+    <style>
+        
+
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: linear-gradient(135deg, #f3e8ff 0%, #fff1f2 50%, #fce7f3 100%);
+            scroll-behavior: smooth; 
+            overflow-x: hidden; 
+        }
+
+        /* Animated Background Hearts (Lavender, Red, Pink) */
+        .floating-heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatUp var(--duration) linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: var(--max-opacity); }
+            90% { opacity: var(--max-opacity); }
+            100% { transform: translateY(-20vh) translateX(var(--drift)) rotate(360deg); opacity: 0; }
+        }
+
+        .heartbeat { animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        .handwritten { font-family: 'Dancing Script', cursive; }
+        .letter-font { font-family: 'Parisienne', cursive; }
+        .signature { font-family: 'Tangerine', cursive; font-size: 5rem; }
+        .glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        .locked { filter: grayscale(1) blur(2px); opacity: 0.5; cursor: not-allowed; }
+        .unlocked { border: 2px solid #fbcfe8; transform: scale(1.02); transition: all 0.4s ease; opacity: 1 !important; cursor: pointer !important; }
+        
+        .polaroid { background: white; padding: 12px 12px 35px 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        
+        .letter-paper { 
+            background: #fdfcf0; 
+            background-image: linear-gradient(#e1d9c1 1px, transparent 1px);
+            background-size: 100% 2.5rem;
+            line-height: 2.5rem;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1); 
+            padding: 40px;
+            border-radius: 4px;
+        }
+
+        /* Testing Panel - Visible for you to check days 
+        .test-panel { position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.85); color: #fff; padding: 10px; border-radius: 12px; z-index: 9999; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .test-btn { font-size: 9px; background: #444; padding: 5px; border-radius: 4px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .test-btn:hover { background: #ec4899; }*/
+    </style>
+</head>
+<body>
+    <div id="lock-screen" class="fixed inset-0 bg-gradient-to-br from-pink-600 to-purple-700 flex items-center justify-center z-[99999]">
+  <div class="bg-white p-8 rounded-3xl text-center shadow-2xl max-w-sm">
+    <h2 class="handwritten text-4xl text-pink-600 mb-4">For Us Only 💕</h2>
+    <p class="text-gray-600 mb-4 italic">Enter our secret to continue</p>
+    <input id="secret-input" type="password" placeholder="Our secret 💖"
+      class="border-2 border-pink-300 rounded-full px-5 py-3 w-full text-center mb-4 focus:outline-none">
+    <button onclick="unlockSite()"
+      class="bg-pink-500 text-white px-8 py-3 rounded-full font-bold hover:scale-105 transition">
+      Unlock 💌
+    </button>
+  </div>
+</div>
+
+
+
+
+    <div id="daily-overlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 hidden backdrop-blur-sm p-4">
+        <div class="bg-white p-8 rounded-[2rem] text-center shadow-2xl border-b-8 border-pink-400 max-w-sm mx-auto">
+            <div id="daily-icon" class="text-7xl mb-4">🌹</div>
+            <h2 id="daily-title" class="handwritten text-4xl text-pink-600 mb-2">Happy Day!</h2>
+            <p id="daily-message" class="text-gray-600 mb-6 text-lg italic leading-relaxed"></p>
+            <button onclick="closeOverlay()" class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-10 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform">See My Memory 💖</button>
+        </div>
+    </div>
+
+    <section class="relative h-screen flex flex-col items-center justify-center text-center p-5 z-10">
+        <div class="heartbeat">
+            <h1 class="text-7xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-red-600 to-pink-500 mb-4 drop-shadow-sm handwritten">For Gunika</h1>
+        </div>
+        <p class="text-xl md:text-2xl text-purple-600 mb-10 font-semibold italic bg-white/40 px-8 py-3 rounded-full backdrop-blur-md">Every day is a reason to love you more...</p>
+        
+        <div id="countdown" class="text-2xl md:text-4xl font-mono bg-white/90 shadow-2xl rounded-[2rem] px-12 py-6 text-pink-600 font-bold border-2 border-purple-100 backdrop-blur-lg">
+            00d 00h 00m 00s
+        </div>
+    </section>
+
+    <section class="relative z-10 py-20 px-5">
+        <h2 class="text-5xl font-bold text-center text-purple-700 mb-12 handwritten">The Valentine Timeline</h2>
+        <div class="max-w-xl mx-auto space-y-4">
+            <div id="btn-7"  class="glass p-6 rounded-3xl flex items-center justify-between locked"><div><h3 class="font-bold text-pink-600">Feb 7: Rose Day</h3></div><span class="status-icon">🔒</span></div>
+            <div id="btn-8" class="glass p-6 rounded-3xl flex items-center justify-between locked"><div><h3 class="font-bold text-pink-600">Feb 8: Propose Day</h3></div><span class="status-icon">🔒</span></div>
+            <div id="btn-9"  class="glass p-6 rounded-3xl flex items-center justify-between locked"><div><h3 class="font-bold text-pink-600">Feb 9: Chocolate Day</h3></div><span class="status-icon">🔒</span></div>
+            <div id="btn-10"  class="glass p-6 rounded-3xl flex items-center justify-between locked"><div><h3 class="font-bold text-pink-600">Feb 10: Teddy Day</h3></div><span class="status-icon">🔒</span></div>
+            <div id="btn-11"  class="glass p-6 rounded-3xl flex items-center justify-between locked"><div><h3 class="font-bold text-pink-600">Feb 11: Promise Day</h3></div><span class="status-icon">🔒</span></div>
+            <div id="btn-12"  class="glass p-6 rounded-3xl flex items-center justify-between locked"><div><h3 class="font-bold text-pink-600">Feb 12: Hug Day</h3></div><span class="status-icon">🔒</span></div>
+            <div id="btn-13"  class="glass p-6 rounded-3xl flex items-center justify-between locked"><div><h3 class="font-bold text-pink-600">Feb 13: Kiss Day</h3></div><span class="status-icon">🔒</span></div>
+            <div id="btn-14"  class="glass p-6 rounded-3xl flex items-center justify-between locked bg-pink-100/50"><div><h3 class="font-extrabold text-red-600 text-xl">Feb 14: Valentine's Day</h3></div><span class="status-icon">🔒</span></div>
+        </div>
+    </section>
+
+    <section id="song-display-area" class="max-w-5xl mx-auto py-20 px-5 hidden relative z-10">
+        <div class="text-center glass p-10 rounded-[3rem] border-2 border-purple-100 shadow-2xl">
+            <h2 id="song-title" class="handwritten text-5xl text-purple-600 mb-8">Memories</h2>
+            <div id="daily-gallery" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 hidden">
+                <div class="polaroid rotate-[-1deg]"><img id="img-1" src="" class="w-full h-80 object-cover rounded"></div>
+                <div class="polaroid rotate-[1deg]"><img id="img-2" src="" class="w-full h-80 object-cover rounded"></div>
+            </div>
+            <div class="rounded-3xl overflow-hidden shadow-2xl border-8 border-white bg-white">
+                <iframe id="spotify-player" src="" width="100%" height="352" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <section id="valentine-reveal" class="hidden py-24 px-5 bg-white/80 backdrop-blur-md relative z-10 border-t-8 border-pink-200">
+        <div class="max-w-3xl mx-auto letter-paper mb-24">
+            <h2 class="handwritten text-4xl text-pink-600 mb-6">The Love Letter</h2>
+            <div class="letter-font text-2xl md:text-3xl text-gray-800 leading-[3.5rem]">
+                <p>"My Dearest Gunika",</p>
+                <p>I wanted to build you something that didn't just say 'I love you' once, but showed you every single day.</p>
+                <p>They say that home is a place, but for me, home has always been a person. It’s in the way you laugh at things nobody else finds funny, the way you support my wildest dreams, and the quiet peace I feel just sitting next to you.</p>
+                <p>This website is a small map of our journey—a digital corner of the world that belongs only to us. But as beautiful as these photos and messages are, they don't compare to the real thing. Thank you for choosing me every day, for being my best friend, and for making life feel like a celebration.</p>
+                <p>No matter where we go or what we do, my heart is—and will always be—exactly where you are.</p>
+                <div class="mt-12 text-right">
+                    <p class="text-lg text-gray-500 italic">Forever Yours,</p>
+                    <p class="signature text-pink-600">Sushant</p>
+                </div>
+            </div>
+        </div>
+        <h2 class="handwritten text-5xl text-center text-purple-700 mb-12">Our Favorite Snaps</h2>
+        <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="polaroid rotate-[-2deg]"><img src="https://i.postimg.cc/J4jFZ06q/Snapchat-396624476.jpg" class="w-full h-64 object-cover"></div>
+            <div class="polaroid rotate-[2deg]"><img src="https://i.postimg.cc/RVv7p0Vz/Snapchat-1901911316.jpg" class="w-full h-64 object-cover"></div>
+            <div class="polaroid rotate-[-1deg]"><img src="https://i.postimg.cc/0QgmYkBq/IMG-20241125-WA0028.jpg" class="w-full h-64 object-cover"></div>
+            <div class="polaroid rotate-[3deg]"><img src="https://i.postimg.cc/v8t9nd7n/Snapchat-1975595221.jpg" class="w-full h-64 object-cover"></div>
+        </div>
+    </section>
+
+    <script>
+        function unlockSite() {
+  const secret = document.getElementById("secret-input").value;
+  if (secret === "gunikasushant@1025") { // 👈 choose YOUR secret
+    document.getElementById("lock-screen").remove();
+  } else {
+    alert("Not for you 💔");
+  }
+}
+
+        // BACKGROUND ANIMATION (Lavender, Red, Pink)
+        const heartColors = ['#e9d5ff', '#fecaca', '#f472b6', '#dc2626', '#a855f7']; 
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('floating-heart');
+            heart.innerHTML = ['❤️', '💖', '💜', '💕', '✨'][Math.floor(Math.random() * 5)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.color = heartColors[Math.floor(Math.random() * heartColors.length)];
+            heart.style.setProperty('--duration', (Math.random() * 6 + 4) + 's');
+            heart.style.setProperty('--drift', (Math.random() * 300 - 150) + 'px');
+            heart.style.setProperty('--max-opacity', Math.random() * 0.5 + 0.3);
+            heart.style.fontSize = (Math.random() * 25 + 10) + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 10000);
+        }
+        setInterval(createHeart, 250);
+
+        // CONFIGURATION WITH YOUR CUSTOM MESSAGES
+        const config = {
+            7: { 
+                title: "Rose Day", icon: "🌹", 
+                msg: "I couldn't decide on just one rose, so I built you a garden that never wilts. You are the most beautiful part of my everyday life Gunika. i know baccha i m not there to give you a rose but my love always available for you", 
+                song: "https://open.spotify.com/embed/track/1ccZZf0IQi5y0bHMl2aGDF?utm_source=generator" ,
+                pics: ["https://i.postimg.cc/G3j4gJ5f/Snapchat-47825297.jpg", "https://i.postimg.cc/7YfTCJK7/Snapchat-303427424.jpg"]
+            },
+            8: { 
+                title: "Propose Day", icon: "💍", 
+                msg: "If I had to do it all over again, I’d choose you every single time. My only 'proposal' today? Let's stay exactly like this forever Gunika.i propose you in a different way when i meet ", 
+                song:"https://open.spotify.com/embed/track/0tgVpDi06FyKpA1z0VMD4v?utm_source=generator",
+                pics: ["https://i.postimg.cc/25rW5k34/Snapchat-43575398.jpg",
+"https://i.postimg.cc/bNW3Ctdh/Snapchat-2129680147.jpg"] 
+            },
+            9: { 
+                title: "Chocolate Day", icon: "🍫", 
+                msg: "Life with you is sweeter than any box of chocolates (though there's a real box waiting for you in the Divya's hands! check it, Gunika!).Nothing is sweetier than you love", 
+                song:"https://open.spotify.com/embed/track/5d6Mjuu2uCGRPYpFjGpCX5?utm_source=generator" ,
+                pics: ["https://i.postimg.cc/B6HSdDBW/Snapchat-1827243579.jpg", "https://i.postimg.cc/B6HSdDBW/Snapchat-1827243579.jpg"]
+            },
+            10: { 
+                title: "Teddy Day", icon: "🧸", 
+                msg: "For the times I'm not there to hold you, here’s a digital hug. You’re my favorite person to get cozy with.you are a big teddy for me always", 
+                song: "https://open.spotify.com/embed/track/2tjWCe2W7sgvS3C8NHcdtI?utm_source=generator" , 
+                pics: ["https://i.postimg.cc/Gm8QwhVQ/Snapchat-1264911497.jpg", "https://i.postimg.cc/gkBDT6S2/Snapchat-287511903.jpg"]
+            },
+            11: { 
+                title: "Promise Day", icon: "🤝", 
+                msg: "I promise to always be your biggest fan, your best friend, and the person who reminds you how incredible you are when you forget.i promise jaan we will stay forever like a husband aur wifey", 
+                song: "https://open.spotify.com/embed/track/56zZ48jdyY2oDXHVnwg5Di?utm_source=generator",
+                pics: ["https://i.postimg.cc/RVVmT2yv/Snapchat-340439518.jpg", "https://i.postimg.cc/W1dPBgs7/Snapchat-396624476.jpg"]
+            },
+            12: { 
+                title: "Hug Day", icon: "🫂", 
+                msg: "Physical distance is just a number. Right now, I’m sending you a hug that lasts 24 hours. Feel it yet? i alwys hug you like a choti bacchi", 
+                song:"https://open.spotify.com/embed/track/1hA697u7e1jX2XM8sWA6Uy?utm_source=generator",
+                pics: ["https://i.postimg.cc/qqvF8HRF/Snapchat-1764202995.jpg", "https://i.postimg.cc/ZRZ25dhW/Snapchat-2069441951.jpg"]
+            },
+            13: { 
+                title: "Kiss Day", icon: "💋", 
+                msg: "One day left. Every kiss we've shared is a memory I keep on a loop. I can't wait for the ones we haven't had yet.", 
+                song: "https://open.spotify.com/embed/track/0pWcUM0z72DhTW7j0fa0QM?utm_source=generator" ,               
+                pics: ["https://i.postimg.cc/g2FDpPW5/Snapchat-379012979.jpg", "https://i.postimg.cc/8zQHGVGF/Snapchat-384510122.jpg"]
+            },
+            14: { 
+                title: "Now Today is Valentine's Day", icon: "💝", 
+                msg: "THE BIG REVEAL: My heart is entirely yours. i Shared our some memories i know baccha we ont celebrate but our love requires most efforts and attentions so we grew up everyyear like HUSBAND AND WIFEY HAPPY VALENTINE DAY MAAH LOVE", 
+                song: "https://open.spotify.com/embed/track/0fCQRUbk8LIQTdQYGNtGyv?utm_source=generator", 
+                pics: [] 
+            }
+        };
+
+        // BUTTON LOGIC
+         function forceUnlock(day) {
+    for (let i = 7; i <= day; i++) {
+        const btn = document.getElementById(`btn-${i}`);
+        if (!btn) continue;
+
+        btn.classList.add('unlocked');
+        btn.classList.remove('locked');
+        btn.querySelector('.status-icon').innerHTML = "💖";
+
+        btn.onclick = () => triggerDay(i); // enable click ONLY now
+    }
+}
+
+
+        function triggerDay(d) {
+    const today = new Date();
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth(); // February = 1
+
+    // Block access if not unlocked yet
+    if (currentMonth !== 1 || currentDay < d) {
+        showLockedToast();
+        return; // do NOTHING
+    }
+
+    const data = config[d];
+    document.getElementById('daily-icon').innerText = data.icon;
+    document.getElementById('daily-title').innerText = "Happy " + data.title + "!";
+    document.getElementById('daily-message').innerText = data.msg;
+    document.getElementById('daily-overlay').classList.remove('hidden');
+    document.getElementById('song-display-area').classList.remove('hidden');
+    document.getElementById('spotify-player').src = data.song;
+
+    const gal = document.getElementById('daily-gallery');
+    if (data.pics && data.pics.length > 0) {
+        gal.classList.remove('hidden');
+        document.getElementById('img-1').src = data.pics[0];
+        document.getElementById('img-2').src = data.pics[1];
+    } else {
+        gal.classList.add('hidden');
+    }
+
+    document.getElementById('valentine-reveal').classList.toggle('hidden', d !== 14);
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+}// Attach click listeners to ALL buttons (locked + unlocked)
+for (let i = 7; i <= 14; i++) {
+    const btn = document.getElementById(`btn-${i}`);
+    if (!btn) continue;
+
+    btn.onclick = () => triggerDay(i);
+}
+
+
+                
+
+        function closeOverlay() {
+            document.getElementById('daily-overlay').classList.add('hidden');
+            document.getElementById('song-display-area').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // COUNTDOWN TIMER
+        const targetDate = new Date("February 14, 2026 00:00:00").getTime();
+        setInterval(() => {
+            const diff = targetDate - new Date().getTime();
+            if (diff > 0) {
+                const days = Math.floor(diff / 86400000);
+                const hrs = Math.floor((diff % 86400000) / 3600000);
+                const mins = Math.floor((diff % 3600000) / 60000);
+                const secs = Math.floor((diff % 60000) / 1000);
+                document.getElementById("countdown").innerHTML = `${days}d ${hrs}h ${mins}m ${secs}s`;
+            } else { document.getElementById("countdown").innerHTML = "Happy Valentine's Day! ❤️"; }
+        }, 1000);
+
+        // AUTO-UNLOCK BASED ON REAL DATE
+        window.onload = () => {
+            const d = new Date();
+            // In February, if the day is between 7 and 14, unlock automatically
+            if (d.getMonth() === 1 && d.getDate() >= 7) forceUnlock(d.getDate());
+        };
+        function showLockedToast() {
+    const toast = document.getElementById('locked-toast');
+    toast.classList.remove('opacity-0');
+    toast.classList.add('opacity-100');
+
+    setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+    }, 2200);
+}
+
+    </script>
+    <div id="locked-toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-pink-600 text-white px-8 py-4 rounded-full shadow-2xl text-lg font-semibold opacity-0 pointer-events-none transition-all duration-500 z-[9999]">
+    💕 Come back tomorrow, my love
+</div>
+
+</body>
+</html>
